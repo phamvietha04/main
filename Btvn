@@ -1,0 +1,203 @@
+#include <iostream>     // Th? vi?n h? tr? nh?p xu?t d? li?u.
+#include <cstring>      // Th? vi?n h? tr? x? ly chu?i.
+
+using namespace std;     // S? d?ng khong gian ten std ?? co th? dung cac ham va bi?n chu?n ma khong c?n them "std::".
+
+// C?u truc ngay thang n?m
+struct Ngay {
+    int ngay, thang, nam;    // Cac thu?c tinh ngay, thang va n?m.
+};
+
+// C?u truc thong tin sinh vien
+struct SinhVien {
+    char maSV[8];          // Ma sinh vien (t?i ?a 7 ky t? + ky t? k?t thuc chu?i '\0').
+    char hoTen[50];        // H? ten (t?i ?a 49 ky t? + '\0').
+    int gioiTinh;          // Gi?i tinh (1 - Nam, 0 - N?).
+    Ngay ngaySinh;         // Ngay sinh (c?u truc Ngay).
+    char diaChi[100];      // ??a ch? (t?i ?a 99 ky t? + '\0').
+    char lop[12];          // L?p (t?i ?a 11 ky t? + '\0').
+    char khoa[7];          // Khoa (t?i ?a 6 ky t? + '\0').
+};
+
+// C?u truc Node ??i di?n cho m?t ph?n t? trong danh sach lien k?t ??n
+struct Node {
+    SinhVien data;         // D? li?u c?a m?t sinh vien.
+    Node *link;            // Con tr? tr? ??n node ti?p theo trong danh sach.
+};
+
+// C?u truc List ??i di?n cho danh sach lien k?t ??n
+struct List {
+    Node *first;           // Con tr? ??u danh sach.
+    Node *last;            // Con tr? cu?i danh sach.
+};
+
+// Kh?i t?o danh sach r?ng
+void initList(List &l) {
+    l.first = nullptr;     // ??t con tr? ??u danh sach la nullptr (r?ng).
+    l.last = nullptr;      // ??t con tr? cu?i danh sach la nullptr (r?ng).
+}
+
+// Ham t?o m?t node m?i ch?a thong tin sinh vien
+Node* createNode(SinhVien sv) {
+    Node *p = new Node;    // C?p phat b? nh? cho m?t node m?i.
+    p->data = sv;          // Gan d? li?u sinh vien vao node.
+    p->link = nullptr;     // Kh?i t?o con tr? link la nullptr (node cu?i danh sach).
+    return p;              // Tr? v? node m?i t?o.
+}
+
+// Ham them sinh vien vao danh sach theo th? t? ma sinh vien
+void addStudentSorted(List &l, SinhVien sv) {
+    Node *p = createNode(sv);     // T?o m?t node m?i ch?a thong tin sinh vien.
+
+    // Tr??ng h?p danh sach r?ng ho?c ma sinh vien c?a node ??u l?n h?n ma c?a sv
+    if (l.first == nullptr || strcmp(l.first->data.maSV, sv.maSV) > 0) {
+        p->link = l.first;        // Lien k?t node m?i v?i node ??u tien.
+        l.first = p;              // C?p nh?t node ??u la node m?i.
+        if (l.last == nullptr) l.last = p;  // N?u node ??u c?ng la node cu?i, c?p nh?t node cu?i.
+    } else {
+        Node *q = l.first;        // Duy?t t? ??u danh sach.
+        // Tim v? tri phu h?p ?? chen (tim node co ma sinh vien nh? h?n sv)
+        while (q->link != nullptr && strcmp(q->link->data.maSV, sv.maSV) < 0) {
+            q = q->link;          // Di chuy?n t?i node ti?p theo.
+        }
+        p->link = q->link;        // Lien k?t node m?i v?i node ti?p theo.
+        q->link = p;              // Lien k?t node tr??c ?o v?i node m?i.
+        if (p->link == nullptr) l.last = p;  // C?p nh?t node cu?i n?u node m?i la node cu?i.
+    }
+}
+
+// Ham nh?p thong tin m?t sinh vien
+SinhVien inputStudent() {
+    SinhVien sv;
+    cout << "Nhap ma sinh vien: ";
+    cin >> sv.maSV;
+    cin.ignore();                 // B? ky t? newline sau nh?p ma sinh vien.
+    cout << "Nhap ho ten: ";
+    cin.getline(sv.hoTen, 50);
+    cout << "Nhap gioi tinh (1 - Nam, 0 - Nu): ";
+    cin >> sv.gioiTinh;
+    cout << "Nhap ngay sinh (ngay thang nam): ";
+    cin >> sv.ngaySinh.ngay >> sv.ngaySinh.thang >> sv.ngaySinh.nam;
+    cin.ignore();
+    cout << "Nhap dia chi: ";
+    cin.getline(sv.diaChi, 100);
+    cout << "Nhap lop: ";
+    cin.getline(sv.lop, 12);
+    cout << "Nhap khoa: ";
+    cin.getline(sv.khoa, 7);
+    return sv;
+}
+
+// Ham hi?n th? thong tin m?t sinh vien
+void displayStudent(SinhVien sv) {
+    cout << "Ma SV: " << sv.maSV << endl;
+    cout << "Ho ten: " << sv.hoTen << endl;
+    cout << "Gioi tinh: " << (sv.gioiTinh == 1 ? "Nam" : "Nu") << endl;
+    cout << "Ngay sinh: " << sv.ngaySinh.ngay << "/" << sv.ngaySinh.thang << "/" << sv.ngaySinh.nam << endl;
+    cout << "Dia chi: " << sv.diaChi << endl;
+    cout << "Lop: " << sv.lop << endl;
+    cout << "Khoa: " << sv.khoa << endl;
+    cout << "----------------------" << endl;
+}
+
+// Ham hi?n th? danh sach sinh vien
+void displayAllStudents(List l) {
+    Node *p = l.first;
+    while (p != nullptr) {
+        displayStudent(p->data);  // Hi?n th? thong tin sinh vien hi?n t?i.
+        p = p->link;              // Di chuy?n t?i node ti?p theo.
+    }
+}
+
+// Ham tim va hi?n th? cac sinh vien co cung ngay sinh
+void findStudentsWithSameBirthday(List l) {
+    bool found = false;
+    Node *p = l.first;
+
+    while (p != nullptr) {
+        Node *q = p->link;
+        bool hasSameBirthday = false;
+        
+        while (q != nullptr) {
+            if (p->data.ngaySinh.ngay == q->data.ngaySinh.ngay &&
+                p->data.ngaySinh.thang == q->data.ngaySinh.thang &&
+                p->data.ngaySinh.nam == q->data.ngaySinh.nam) {
+                
+                if (!hasSameBirthday) {
+                    displayStudent(p->data); // In sinh vien ??u tien co cung ngay sinh
+                    hasSameBirthday = true;
+                    found = true;
+                }
+                displayStudent(q->data); // In cac sinh vien ti?p theo co cung ngay sinh
+            }
+            q = q->link;
+        }
+        p = p->link;
+    }
+
+    if (!found) {
+        cout << "Khong tim thay sinh vien cung ngay sinh." << endl;
+    }
+}
+
+// Ham lo?i b? cac sinh vien co cung ngay sinh
+void removeStudentsWithSameBirthday(List &l) {
+    Node *p = l.first;
+    Node *prev = nullptr;
+
+    while (p != nullptr) {
+        Node *q = p->link;
+        bool hasSameBirthday = false;
+        
+        while (q != nullptr) {
+            if (p->data.ngaySinh.ngay == q->data.ngaySinh.ngay &&
+                p->data.ngaySinh.thang == q->data.ngaySinh.thang &&
+                p->data.ngaySinh.nam == q->data.ngaySinh.nam) {
+                
+                hasSameBirthday = true;
+                break;
+            }
+            q = q->link;
+        }
+
+        if (hasSameBirthday) {
+            Node *temp = p;
+            Node *current = p;
+            Ngay sameBirthday = p->data.ngaySinh;
+            
+            // Xoa t?t c? cac sinh vien co cung ngay sinh trong danh sach
+            while (current != nullptr && current->data.ngaySinh.ngay == sameBirthday.ngay &&
+                   current->data.ngaySinh.thang == sameBirthday.thang &&
+                   current->data.ngaySinh.nam == sameBirthday.nam) {
+                
+                if (current == l.first) {
+                    l.first = current->link;
+                } else {
+                    prev->link = current->link;
+                }
+                
+                temp = current;
+                current = current->link;
+                delete temp;
+            }
+            p = current;
+        } else {
+            prev = p;
+            p = p->link;
+        }
+    }
+}
+
+// Ham main, n?i x? ly logic chinh c?a ch??ng trinh
+int main() {
+    List l;
+    initList(l);          // Kh?i t?o danh sach r?ng.
+    int choice;
+
+    do {
+        cout << "\n==== Quan ly sinh vien ====\n";
+        cout << "1. Them sinh vien\n";
+        cout << "2. Hien thi danh sach sinh vien\n";
+        cout << "3. Tim sinh vien co cung ngay sinh\n";
+        cout << "4. Xoa sinh vien co cung ngay sinh\n";
+        cout << "0. Thoat
